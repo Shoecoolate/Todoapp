@@ -1,0 +1,39 @@
+.app {
+  display: grid;
+  grid-template-rows: 150px auto;
+
+}
+
+.app_main{
+  display: flex;
+  justify-content: space-evenly;
+  padding: 20px 8%;
+
+}
+
+.task_column {
+  width: 33.33%;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task_column_header {
+
+  background-color: tomato;
+  
+}
+
+.todo_item{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.todo_container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
