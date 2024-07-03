@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-
+import React, { useCallback, useEffect } from "react";
 import "./App.css";
 import TaskForm from "./components/TaskForm";
 
@@ -8,40 +7,93 @@ const App = () => {
   const [inProgress, setInProgress] = React.useState([]);
   const [completed, setCompleted] = React.useState([]);
 
-  const [task, setTask] = React.useState([]);
+  const [task, setTask] = React.useState("");
   const [status, setStatus] = React.useState("PENDING");
+  const [deadline, setDeadline] = React.useState("");
 
-  // Add todos
+  const [progress, setProgress] = React.useState({
+    completed: 0,
+    inProgress: 0,
+    overdueToDo: 0,
+    overdueInProgress: 0
+  });
+
+  const [notifiedTasks, setNotifiedTasks] = React.useState([]);
+
+  useEffect(() => {
+    const totalTasks = todos.length + inProgress.length + completed.length;
+    const completedPercentage = totalTasks ? (completed.length / totalTasks) * 100 : 0;
+    const inProgressPercentage = totalTasks ? ((inProgress.length / totalTasks) * 50) : 0; // Half the length of the green bar
+
+    const overdueToDo = todos.filter(task => new Date(task.deadline) < new Date()).length;
+    const overdueInProgress = inProgress.filter(task => new Date(task.deadline) < new Date()).length;
+
+    const overdueToDoPercentage = overdueToDo ? ((overdueToDo / totalTasks) * 25) : 0; // Half of the orange bar
+    const overdueInProgressPercentage = overdueInProgress ? ((overdueInProgress / totalTasks) * 50) : 0; // Same length as orange bar
+
+    setProgress({
+      completed: completedPercentage,
+      inProgress: inProgressPercentage,
+      overdueToDo: overdueToDoPercentage,
+      overdueInProgress: overdueInProgressPercentage
+    });
+  }, [todos, inProgress, completed]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // If no task in input then return
     if (!task) return;
 
+    // Check if the deadline is set for PENDING and IN_PROGRESS tasks
+    if ((status === "PENDING" || status === "IN_PROGRESS") && !deadline) {
+      alert("Please set a deadline for the task.");
+      return;
+    }
+
+    const newTask = { name: task, status, deadline };
+
     if (status === "PENDING") {
-      setTodos((prev) => [...prev, { name: task, status }]);
+      setTodos((prev) => [...prev, newTask]);
     } else if (status === "IN_PROGRESS") {
-      setInProgress((prev) => [...prev, { name: task, status }]);
+      setInProgress((prev) => [...prev, newTask]);
     } else {
-      setCompleted((prev) => [...prev, { name: task, status }]);
+      setCompleted((prev) => [...prev, newTask]);
     }
 
     setTask("");
     setStatus("PENDING");
+    setDeadline("");
   };
 
-  // Delete todos
   const handleDelete = (idx, type) => {
     if (type === "todo") {
-      const filtered = todos?.filter((_, i) => idx !== i);
-      setTodos(filtered);
+      setTodos(todos.filter((_, i) => idx !== i));
     } else if (type === "inprogress") {
-      const filtered = inProgress?.filter((_, i) => idx !== i);
-      setInProgress(filtered);
+      setInProgress(inProgress.filter((_, i) => idx !== i));
     } else {
-      const filtered = completed?.filter((_, i) => idx !== i);
-      setCompleted(filtered);
+      setCompleted(completed.filter((_, i) => idx !== i));
     }
   };
+
+  const checkDeadlines = () => {
+    const now = new Date().toISOString().split("T")[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+    [...todos, ...inProgress].forEach((task) => {
+      if (notifiedTasks.includes(task.name)) return;
+      if (task.deadline && (task.deadline === now || task.deadline === tomorrowStr)) {
+        alert(
+          `IMPORTANT: TASK DUE ${task.deadline === now ? "TODAY" : "TOMORROW"}. Buhata na choi para wa nakay problemahon`
+        );
+        setNotifiedTasks((prev) => [...prev, task.name]);
+      }
+    });
+  };
+
+  useEffect(() => {
+    checkDeadlines();
+  }, [todos, inProgress]);
 
   return (
     <div className="app">
@@ -51,29 +103,45 @@ const App = () => {
         onSubmit={handleSubmit}
         status={status}
         onSelect={(e) => setStatus(e.target.value)}
+        deadline={deadline}
+        onDeadlineChange={(e) => setDeadline(e.target.value)}
       />
+      <div className="progress-bar">
+        <div className="progress overdue-todo" style={{ width: `${progress.overdueToDo}%` }}></div>
+        <div className="progress overdue-inprogress" style={{ width: `${progress.overdueInProgress}%` }}></div>
+        <div className="progress in-progress" style={{ width: `${progress.inProgress}%` }}></div>
+        <div className="progress completed" style={{ width: `${progress.completed}%` }}></div>
+      </div>
       <main className="app_main">
         <section className="task_column">
           <div className="task_column_header">
             <h1>To-do</h1>
           </div>
           <div className="todo_container">
-            {todos?.map((todo, i) => (
-              <div className="todo_item" key={i}>
+            {todos.map((todo, i) => (
+              <div
+                className="todo_item"
+                key={i}
+                style={{ color: new Date(todo.deadline) < new Date() ? "red" : "black" }}
+              >
                 <p>{todo.name}</p>
-                <div>
+                <input
+                  type="text"
+                  className="deadline_text"
+                  value={todo.deadline}
+                  readOnly
+                />
+                <div className="todo_item_buttons">
                   <button
                     onClick={() => {
                       setInProgress((prev) => [...prev, todo]);
-
-                      const filteredTodos = todos?.filter((_, k) => i !== k);
-                      setTodos(filteredTodos);
+                      setTodos(todos.filter((_, k) => i !== k));
                     }}
                   >
-                    in progress
+                    In Progress
                   </button>
                   <button onClick={() => handleDelete(i, "todo")}>
-                    delete
+                    Delete
                   </button>
                 </div>
               </div>
@@ -86,36 +154,38 @@ const App = () => {
             <h1>In progress</h1>
           </div>
           <div className="todo_container">
-            {inProgress?.map((todo, i) => (
-              <div className="todo_item" key={i}>
+            {inProgress.map((todo, i) => (
+              <div
+                className="todo_item"
+                key={i}
+                style={{ color: new Date(todo.deadline) < new Date() ? "red" : "black" }}
+              >
                 <p>{todo.name}</p>
-                <div>
+                <input
+                  type="text"
+                  className="deadline_text"
+                  value={todo.deadline}
+                  readOnly
+                />
+                <div className="todo_item_buttons">
                   <button
                     onClick={() => {
                       setTodos((prev) => [...prev, todo]);
-
-                      const filteredInProgress = inProgress?.filter(
-                        (_, k) => i !== k
-                      );
-                      setInProgress(filteredInProgress);
+                      setInProgress(inProgress.filter((_, k) => i !== k));
                     }}
                   >
-                    mark to do
+                    To do
                   </button>
                   <button
                     onClick={() => {
                       setCompleted((prev) => [...prev, todo]);
-
-                      const filteredInProgress = inProgress?.filter(
-                        (_, k) => i !== k
-                      );
-                      setInProgress(filteredInProgress);
+                      setInProgress(inProgress.filter((_, k) => i !== k));
                     }}
                   >
-                    mark completed
+                    Completed
                   </button>
                   <button onClick={() => handleDelete(i, "inprogress")}>
-                    delete
+                    Delete
                   </button>
                 </div>
               </div>
@@ -128,24 +198,26 @@ const App = () => {
             <h1>Completed</h1>
           </div>
           <div className="todo_container">
-            {completed?.map((todo, i) => (
+            {completed.map((todo, i) => (
               <div className="todo_item" key={i}>
                 <p>{todo.name}</p>
-                <div>
+                <input
+                  type="text"
+                  className="deadline_text"
+                  value={todo.deadline}
+                  readOnly
+                />
+                <div className="todo_item_buttons">
                   <button
                     onClick={() => {
                       setInProgress((prev) => [...prev, todo]);
-
-                      const filteredCompleted = completed?.filter(
-                        (_, k) => i !== k
-                      );
-                      setCompleted(filteredCompleted);
+                      setCompleted(completed.filter((_, k) => i !== k));
                     }}
                   >
-                    mark incomplete
+                    Incomplete
                   </button>
                   <button onClick={() => handleDelete(i, "completed")}>
-                    delete
+                    Delete
                   </button>
                 </div>
               </div>
