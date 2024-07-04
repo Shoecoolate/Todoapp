@@ -1,7 +1,7 @@
-
-* {
+body {
+  background-color: skyblue; /* Set the background color of the whole page */
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: Arial, sans-serif; /* Add a default font family */
 }
-/* global styling

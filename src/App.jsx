@@ -15,7 +15,7 @@ const App = () => {
     completed: 0,
     inProgress: 0,
     overdueToDo: 0,
-    overdueInProgress: 0
+    overdueInProgress: 0,
   });
 
   const [notifiedTasks, setNotifiedTasks] = React.useState([]);
@@ -23,19 +23,19 @@ const App = () => {
   useEffect(() => {
     const totalTasks = todos.length + inProgress.length + completed.length;
     const completedPercentage = totalTasks ? (completed.length / totalTasks) * 100 : 0;
-    const inProgressPercentage = totalTasks ? ((inProgress.length / totalTasks) * 50) : 0; // Half the length of the green bar
+    const inProgressPercentage = totalTasks ? (inProgress.length / totalTasks) * 50 : 0; // Half the length of the green bar
 
-    const overdueToDo = todos.filter(task => new Date(task.deadline) < new Date()).length;
-    const overdueInProgress = inProgress.filter(task => new Date(task.deadline) < new Date()).length;
+    const overdueToDo = todos.filter((task) => new Date(task.deadline) < new Date()).length;
+    const overdueInProgress = inProgress.filter((task) => new Date(task.deadline) < new Date()).length;
 
-    const overdueToDoPercentage = overdueToDo ? ((overdueToDo / totalTasks) * 25) : 0; // Half of the orange bar
-    const overdueInProgressPercentage = overdueInProgress ? ((overdueInProgress / totalTasks) * 50) : 0; // Same length as orange bar
+    const overdueToDoPercentage = overdueToDo ? (overdueToDo / totalTasks) * 25 : 0; // Half of the orange bar
+    const overdueInProgressPercentage = overdueInProgress ? (overdueInProgress / totalTasks) * 50 : 0; // Same length as orange bar
 
     setProgress({
       completed: completedPercentage,
       inProgress: inProgressPercentage,
       overdueToDo: overdueToDoPercentage,
-      overdueInProgress: overdueInProgressPercentage
+      overdueInProgress: overdueInProgressPercentage,
     });
   }, [todos, inProgress, completed]);
 
@@ -84,7 +84,9 @@ const App = () => {
       if (notifiedTasks.includes(task.name)) return;
       if (task.deadline && (task.deadline === now || task.deadline === tomorrowStr)) {
         alert(
-          `IMPORTANT: TASK DUE ${task.deadline === now ? "TODAY" : "TOMORROW"}. Buhata na choi para wa nakay problemahon`
+          `IMPORTANT: TASK DUE ${
+            task.deadline === now ? "TODAY" : "TOMORROW"
+          }. Buhata na choi para wa nakay problemahon`
         );
         setNotifiedTasks((prev) => [...prev, task.name]);
       }
@@ -117,7 +119,7 @@ const App = () => {
           <div className="task_column_header">
             <h1>To-do</h1>
           </div>
-          <div className="todo_container">
+          <div className="tasks_container">
             {todos.map((todo, i) => (
               <div
                 className="todo_item"
@@ -153,7 +155,7 @@ const App = () => {
           <div className="task_column_header">
             <h1>In progress</h1>
           </div>
-          <div className="todo_container">
+          <div className="tasks_container">
             {inProgress.map((todo, i) => (
               <div
                 className="todo_item"
@@ -197,7 +199,7 @@ const App = () => {
           <div className="task_column_header">
             <h1>Completed</h1>
           </div>
-          <div className="todo_container">
+          <div className="tasks_container">
             {completed.map((todo, i) => (
               <div className="todo_item" key={i}>
                 <p>{todo.name}</p>
