@@ -3,14 +3,17 @@ import "./App.css";
 import TaskForm from "./components/TaskForm";
 
 const App = () => {
+  // variables para imanage tung tasks sa different statuses
   const [todos, setTodos] = React.useState([]);
   const [inProgress, setInProgress] = React.useState([]);
   const [completed, setCompleted] = React.useState([]);
 
+  // variables para imanage tung form inputs
   const [task, setTask] = React.useState("");
   const [status, setStatus] = React.useState("PENDING");
   const [deadline, setDeadline] = React.useState("");
 
+  // variable para sa progress bar
   const [progress, setProgress] = React.useState({
     completed: 0,
     inProgress: 0,
@@ -18,16 +21,20 @@ const App = () => {
     overdueInProgress: 0,
   });
 
+  // variable para imanage ang notified tasks
   const [notifiedTasks, setNotifiedTasks] = React.useState([]);
 
+  // useEffect: mao ning magcalculate sa progress bar percentages pag magchange ang tasks
   useEffect(() => {
     const totalTasks = todos.length + inProgress.length + completed.length;
     const completedPercentage = totalTasks ? (completed.length / totalTasks) * 100 : 0;
     const inProgressPercentage = totalTasks ? (inProgress.length / totalTasks) * 50 : 0; // Half the length of the green bar
 
+    // Calculate overdue tasks
     const overdueToDo = todos.filter((task) => new Date(task.deadline) < new Date()).length;
     const overdueInProgress = inProgress.filter((task) => new Date(task.deadline) < new Date()).length;
 
+    // Calculate overdue task percentages
     const overdueToDoPercentage = overdueToDo ? (overdueToDo / totalTasks) * 25 : 0; // Half of the orange bar
     const overdueInProgressPercentage = overdueInProgress ? (overdueInProgress / totalTasks) * 50 : 0; // Same length as orange bar
 
@@ -39,6 +46,7 @@ const App = () => {
     });
   }, [todos, inProgress, completed]);
 
+  // Function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!task) return;
@@ -51,6 +59,7 @@ const App = () => {
 
     const newTask = { name: task, status, deadline };
 
+    // Add the new task to the appropriate list
     if (status === "PENDING") {
       setTodos((prev) => [...prev, newTask]);
     } else if (status === "IN_PROGRESS") {
@@ -59,11 +68,13 @@ const App = () => {
       setCompleted((prev) => [...prev, newTask]);
     }
 
+    // Reset form inputs
     setTask("");
     setStatus("PENDING");
     setDeadline("");
   };
 
+  // Function to handle task deletion
   const handleDelete = (idx, type) => {
     if (type === "todo") {
       setTodos(todos.filter((_, i) => idx !== i));
@@ -74,6 +85,7 @@ const App = () => {
     }
   };
 
+  // Function to check deadlines and notify the user
   const checkDeadlines = () => {
     const now = new Date().toISOString().split("T")[0];
     const tomorrow = new Date();
@@ -93,6 +105,7 @@ const App = () => {
     });
   };
 
+  // useEffect to check deadlines when tasks change
   useEffect(() => {
     checkDeadlines();
   }, [todos, inProgress]);
@@ -109,12 +122,14 @@ const App = () => {
         onDeadlineChange={(e) => setDeadline(e.target.value)}
       />
       <div className="progress-bar">
+        {/* Render progress bars with calculated widths */}
         <div className="progress overdue-todo" style={{ width: `${progress.overdueToDo}%` }}></div>
         <div className="progress overdue-inprogress" style={{ width: `${progress.overdueInProgress}%` }}></div>
         <div className="progress in-progress" style={{ width: `${progress.inProgress}%` }}></div>
         <div className="progress completed" style={{ width: `${progress.completed}%` }}></div>
       </div>
       <main className="app_main">
+        {/* To-do section */}
         <section className="task_column">
           <div className="task_column_header">
             <h1>To-do</h1>
@@ -151,6 +166,7 @@ const App = () => {
           </div>
         </section>
 
+        {/* In-progress section */}
         <section className="task_column">
           <div className="task_column_header">
             <h1>In progress</h1>
@@ -195,6 +211,7 @@ const App = () => {
           </div>
         </section>
 
+        {/* Completed section */}
         <section className="task_column">
           <div className="task_column_header">
             <h1>Completed</h1>
