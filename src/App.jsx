@@ -86,7 +86,7 @@ const App = () => {
         alert(
           `IMPORTANT: TASK DUE ${
             task.deadline === now ? "TODAY" : "TOMORROW"
-          }. Buhata na choi para wa nakay problemahon`
+          }. Please do it`
         );
         setNotifiedTasks((prev) => [...prev, task.name]);
       }
