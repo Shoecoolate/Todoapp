@@ -30,11 +30,11 @@ const App = () => {
     const completedPercentage = totalTasks ? (completed.length / totalTasks) * 100 : 0;
     const inProgressPercentage = totalTasks ? (inProgress.length / totalTasks) * 50 : 0; // Half the length of the green bar
 
-    // Calculate overdue tasks
+    // pangcalculate ug overdue tasks
     const overdueToDo = todos.filter((task) => new Date(task.deadline) < new Date()).length;
     const overdueInProgress = inProgress.filter((task) => new Date(task.deadline) < new Date()).length;
 
-    // Calculate overdue task percentages
+    // pangcalculate overdue task percentages
     const overdueToDoPercentage = overdueToDo ? (overdueToDo / totalTasks) * 25 : 0; // Half of the orange bar
     const overdueInProgressPercentage = overdueInProgress ? (overdueInProgress / totalTasks) * 50 : 0; // Same length as orange bar
 
@@ -46,12 +46,12 @@ const App = () => {
     });
   }, [todos, inProgress, completed]);
 
-  // Function to handle form submission
+  // Function para ihandle ang form submission or input pag wala ganey sulod ang input dili siya magsubmit
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!task) return;
 
-    // Check if the deadline is set for PENDING and IN_PROGRESS tasks
+    // Check if ang deadline is set for PENDING and IN_PROGRESS tasks, mao ning para magnotif if walay deadline giset si user
     if ((status === "PENDING" || status === "IN_PROGRESS") && !deadline) {
       alert("Please set a deadline for the task.");
       return;
@@ -59,7 +59,7 @@ const App = () => {
 
     const newTask = { name: task, status, deadline };
 
-    // Add the new task to the appropriate list
+    // Add ang new task na giinput sa kung asa siya dapat na list
     if (status === "PENDING") {
       setTodos((prev) => [...prev, newTask]);
     } else if (status === "IN_PROGRESS") {
@@ -74,7 +74,7 @@ const App = () => {
     setDeadline("");
   };
 
-  // Function to handle task deletion
+  // Function para maghandle ug task deletion
   const handleDelete = (idx, type) => {
     if (type === "todo") {
       setTodos(todos.filter((_, i) => idx !== i));
@@ -85,7 +85,7 @@ const App = () => {
     }
   };
 
-  // Function to check deadlines and notify the user
+  // Function para icheck ang deadlines tas inotify si user
   const checkDeadlines = () => {
     const now = new Date().toISOString().split("T")[0];
     const tomorrow = new Date();
@@ -105,7 +105,7 @@ const App = () => {
     });
   };
 
-  // useEffect to check deadlines when tasks change
+  // useEffect para icheck ang deadlines when tasks change, pag gibalhin sa pikas na list icheck niya deadline
   useEffect(() => {
     checkDeadlines();
   }, [todos, inProgress]);
@@ -122,7 +122,7 @@ const App = () => {
         onDeadlineChange={(e) => setDeadline(e.target.value)}
       />
       <div className="progress-bar">
-        {/* Render progress bars with calculated widths */}
+        {/* pangrender sa progress bars with calculated widths */}
         <div className="progress overdue-todo" style={{ width: `${progress.overdueToDo}%` }}></div>
         <div className="progress overdue-inprogress" style={{ width: `${progress.overdueInProgress}%` }}></div>
         <div className="progress in-progress" style={{ width: `${progress.inProgress}%` }}></div>

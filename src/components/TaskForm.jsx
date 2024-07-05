@@ -1,6 +1,7 @@
 import React from "react";
 import "./TaskForm.css";
 
+// TaskForm component para pag input ug new tasks
 const TaskForm = ({ onSubmit, onChange, value, onSelect, status, deadline, onDeadlineChange }) => {
   return (
     <header className="app_header">
